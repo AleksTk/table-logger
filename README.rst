@@ -32,6 +32,7 @@ Features
 
 * sane default formatting for basic python types
 * row number, timestamp and time delta columns
+* csv output
 * allows to adjust column width and format
 * python 2.7 and 3 support
 
@@ -70,6 +71,21 @@ Output::
     |         3 | 2016-01-01 21:40:37.957569 |     2.000253916 | c                    |
     |         4 | 2016-01-01 21:40:37.957569 |     0.000500202 | d                    |
     |         5 | 2016-01-01 21:40:39.958323 |     2.000253916 | e                    |
+
+
+
+Output to csv file::
+    
+     with open('log.csv', 'w') as csvfile:
+        tbl = TableLogger(file=csvfile, csv=True, columns=['a', 'b'])
+        tbl('John "Smith"',  1200000.890)
+        tbl('Tommy,Cache',   70000.125)
+
+Output::
+
+    a,b
+    "John ""Smith""",1200000.890000
+    "Tommy,Cache",70000.125000
 
 
 

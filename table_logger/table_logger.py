@@ -59,8 +59,13 @@ Examples:
 """
 import sys
 import datetime
+import csv
+import io
 
 from . import fmt
+
+
+PY2 = sys.version_info[0] == 2
 
 
 type2fmt = {
@@ -87,9 +92,11 @@ class TableLogger(object):
         columns (list): column names. If specified, a table header will be
             printed. Defaults to None.
         border (boolean): draw table borders. Defaults to True.
+        csv (boolean): print output in csv format
         formatters (dict): custom column formatters. Defaults to None.
         colwidth (dict): custom column widths. Defaults to None.
         file (file object): Defaults to sys.stdout
+        encoding (unicode): Output encoding
     """
     
     
@@ -99,18 +106,22 @@ class TableLogger(object):
                  rownum=False,
                  columns=None,
                  border=True,
+                 csv=False,
                  formatters=None,
                  colwidth=None,
                  file=sys.stdout,
+                 encoding='utf-8'
                  ):
         self.time_diff = time_delta
         self.timestamp = timestamp
         self.rownum = rownum
         self.columns = columns if columns is not None else []
         self.border = border
+        self.csv = csv
         self.column_formatters = formatters or {}
         self.column_widths = colwidth or {}
         self.file = file
+        self.encoding = encoding
         
         self.col_sep = ' '
         self.formatters = []
@@ -121,8 +132,45 @@ class TableLogger(object):
             self.columns.insert(0, 'timestamp')
         if rownum:
             self.columns.insert(0, 'row')
+    
+    
+    def __call__(self, *args):
+        """Prints a formatted row
         
+        Args:
+            args: row cells
+        """
+        if len(self.formatters) == 0:
+            self.setup(*args)
         
+        row_cells = []
+        
+        if self.rownum:
+            row_cells.append(0)
+        if self.timestamp:
+            row_cells.append(datetime.datetime.now())
+        if self.time_diff:
+            row_cells.append(0)
+        
+        row_cells.extend(args)
+        
+        if len(row_cells) != len(self.formatters):
+            raise ValueError('Expected number of columns is {}. Got {}.'.format(
+                                len(self.formatters), len(row_cells)))
+        
+        line = self.format_row(*row_cells)
+        self.print_line(line)
+    
+    
+    def format_row(self, *args):
+        vals = [self.format_column(value, col) for col, value in enumerate(args)]
+        row = self.join_row_items(*vals)
+        return row
+    
+    
+    def format_column(self, value, col):
+        return self.formatters[col](value)
+    
     
     def setup_formatters(self, *args):
         """ Setup formatters by observing the first row.  
@@ -166,34 +214,6 @@ class TableLogger(object):
         self.formatters = formatters
     
     
-    def __call__(self, *args):
-        """Prints a formatted row
-        
-        Args:
-            *args: row cells
-        """
-        if len(self.formatters) == 0:
-            self.setup(*args)
-        
-        row_cells = []
-        
-        if self.rownum:
-            row_cells.append(0)
-        if self.timestamp:
-            row_cells.append(datetime.datetime.now())
-        if self.time_diff:
-            row_cells.append(0)
-        
-        row_cells.extend(args)
-        
-        if len(row_cells) != len(self.formatters):
-            raise ValueError('Expected number of columns is {}. Got {}.'.format(
-                                len(self.formatters), len(row_cells)))
-        
-        line = self.format_row(*row_cells)
-        self.print_line(line)
-    
-    
     def setup(self, *args):
         """Do preparations before printing the first row
         
@@ -203,18 +223,8 @@ class TableLogger(object):
         self.setup_formatters(*args)
         if self.columns:
             self.print_header()
-        elif self.border:
+        elif self.border and not self.csv:
             self.print_line(self.make_horizontal_border())
-        
-    
-    def format_row(self, *args):
-        vals = [self.format_column(value, col) for col, value in enumerate(args)]
-        row = self.join_row_items(*vals)
-        return row
-    
-    
-    def format_column(self, value, col):
-        return self.formatters[col](value)
     
     
     def print_header(self):
@@ -228,7 +238,9 @@ class TableLogger(object):
         
         header = self.join_row_items(*col_names)
         
-        if self.border == True:
+        if self.csv:
+            self.print_line(header)
+        elif self.border:
             self.print_line(self.make_horizontal_border())
             self.print_line(header)
             self.print_line(self.make_horizontal_border('|'))
@@ -242,14 +254,38 @@ class TableLogger(object):
     
     
     def join_row_items(self, *args):
-        if self.border == True:
-            return '| {} |'.format(' | '.join(args))
+        if self.csv:
+            row = self.csv_format(args)
+        elif self.border:
+            row = '| {} |'.format(' | '.join(args))
         else:
-            return '{}'.format(self.col_sep).join(args)
-        
+            row = '{}'.format(self.col_sep).join(args)
+        return row
+    
     
     def print_line(self, text):
-        self.file.write(text)
-        self.file.write('\n')
+        self.file.write(text.encode(self.encoding))
+        self.file.write(b'\n')
         self.file.flush()
-
+    
+    
+    def csv_format(self, row):
+        '''
+        Converts row values into a csv line
+        
+        Args:
+            row: a list of row cells as unicode
+        Returns:
+            csv_line (unicode)
+        '''
+        if PY2:
+            buf = io.BytesIO()
+            csvwriter = csv.writer(buf)
+            csvwriter.writerow([c.strip().encode(self.encoding) for c in row])
+            csv_line = buf.getvalue().decode(self.encoding).rstrip()
+        else:
+            buf = io.StringIO()
+            csvwriter = csv.writer(buf)
+            csvwriter.writerow([c.strip() for c in row])
+            csv_line = buf.getvalue().rstrip()
+        return csv_line
