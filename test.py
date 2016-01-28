@@ -42,51 +42,85 @@ class Test(unittest.TestCase):
     
     def test_print_to_file(self):
         f = io.StringIO()
-        tpl = TableLogger(file=f, column_widths={0:2, 1:5})
-        tpl('12', '12345')
-        tpl('ab', 'cdefg')
+        tbl = TableLogger(file=f, colwidth={0:2, 1:5})
+        tbl('12', '12345')
+        tbl('ab', 'cdefg')
         self.assertEqual('+----+-------+\n| 12 | 12345 |\n| ab | cdefg |\n',
                          f.getvalue())
     
     
     def test_border(self):
         f = io.StringIO()
-        tpl = TableLogger(file=f, column_widths={0:1, 1:1})
-        tpl(1, 1)
+        tbl = TableLogger(file=f, colwidth={0:1, 1:1})
+        tbl(1, 1)
         self.assertEqual('+---+---+\n| 1 | 1 |\n', f.getvalue())
         
         f = io.StringIO()
-        tpl = TableLogger(file=f, column_widths={0:1, 1:1}, border=False)
-        tpl(1, 1)
+        tbl = TableLogger(file=f, colwidth={0:1, 1:1}, border=False)
+        tbl(1, 1)
         self.assertEqual('1 1\n', f.getvalue())
         
         f = io.StringIO()
-        tpl = TableLogger(file=f, column_widths={0:1, 1:1}, 
+        tbl = TableLogger(file=f, colwidth={0:1, 1:1}, 
                            columns=['a', 'b'], border=False)
-        tpl(1, 1)
+        tbl(1, 1)
         self.assertEqual('a b\n1 1\n', f.getvalue())
         
     
     def test_custom_formatters(self):
         f = io.StringIO()
-        tpl = TableLogger(file=f, border=False,
-                           column_formatters={0: '{:,.2f}'.format,
-                                              1: '{:%Y-%m-%d}'.format}
-                           )
-        tpl(12345.1234, datetime.date(2013, 12, 25))
+        tbl = TableLogger(file=f, border=False,
+                          formatters={0: '{:,.2f}'.format,
+                                      1: '{:%Y-%m-%d}'.format}
+                          )
+        tbl(12345.1234, datetime.date(2013, 12, 25))
         self.assertEqual('12,345.12 2013-12-25', f.getvalue().strip())
+        
+        f = io.StringIO()
+        tbl = TableLogger(file=f, 
+                          border=False,
+                          columns=['number', 'datetime'],
+                          formatters={'number':   '{:,.2f}'.format,
+                                      'datetime': '{:%Y-%m-%d}'.format}
+                          )
+        tbl(12345.1234, datetime.date(2013, 12, 25))
+        self.assertEqual('12,345.12 2013-12-25', f.getvalue().split('\n')[1].strip())
     
+    
+    def test_colwidth(self):
+        f = io.StringIO()
+        tbl = TableLogger(file=f, border=False, colwidth={0: 30})
+        tbl('col1')
+        self.assertEqual(len(f.getvalue()) - 1, 30)
+        
+        f = io.StringIO()
+        tbl = TableLogger(file=f, border=False, colwidth={0: 30, 1: 20})
+        tbl('col1', 345)
+        self.assertEqual(len(f.getvalue()) - 2, 30 + 20)
+        
+        f = io.StringIO()
+        tbl = TableLogger(file=f, border=False, columns=['col1'], 
+                          colwidth={'col1': 30})
+        tbl('value')
+        self.assertEqual(len(f.getvalue().split('\n')[1]), 30)
+        
+        f = io.StringIO()
+        tbl = TableLogger(file=f, border=False, columns=['c1', 'c2'], 
+                          colwidth={'c1': 30, 'c2': 20})
+        tbl('col1', 345)
+        self.assertEqual(len(f.getvalue().split('\n')[1]) - 1, 30 + 20)
+        
     
     def test_invalid_column_number(self):
-        tpl = TableLogger(file=io.StringIO())
-        tpl(1, 2)
-        self.assertRaises(ValueError, lambda: tpl(1,2,3))
+        tbl = TableLogger(file=io.StringIO())
+        tbl(1, 2)
+        self.assertRaises(ValueError, lambda: tbl(1,2,3))
     
     
     def test_timestamp_column(self):
         f = io.StringIO()
-        tpl = TableLogger(file=f, timestamp=True, border=False)
-        tpl()
+        tbl = TableLogger(file=f, timestamp=True, border=False)
+        tbl()
         val = datetime.datetime.strptime(' '.join(f.getvalue().split()[-2:]), 
                                          '%Y-%m-%d %H:%M:%S.%f')
         self.assertTrue((datetime.datetime.now() - val).total_seconds() < 1)
@@ -94,28 +128,28 @@ class Test(unittest.TestCase):
     
     def test_time_delta_column(self):
         f = io.StringIO()
-        tpl = TableLogger(file=f, time_delta=True, border=False)
-        tpl()
+        tbl = TableLogger(file=f, time_delta=True, border=False)
+        tbl()
         val = float(f.getvalue().split()[-1])
         self.assertAlmostEqual(0, val, places=2)
         
         time.sleep(1)
-        tpl()
+        tbl()
         val = float(f.getvalue().split()[-1])
         self.assertAlmostEqual(1, val, places=2)
         
         time.sleep(3)
-        tpl()
+        tbl()
         val = float(f.getvalue().split()[-1])
         self.assertAlmostEqual(3, val, places=2)
     
     
     def test_rownum_column(self):
         f = io.StringIO()
-        tpl = TableLogger(file=f, rownum=True, border=False)
+        tbl = TableLogger(file=f, rownum=True, border=False)
         
         for i in range(1, 10):
-            tpl()
+            tbl()
             val = int(f.getvalue().split()[-1])
             self.assertEqual(i, val)
     

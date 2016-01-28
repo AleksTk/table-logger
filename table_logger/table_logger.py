@@ -7,9 +7,9 @@ Examples:
     
     Minimalistic example:
     
-    >>> tpr = TableLogger()
-    >>> tpr(1, 'Row1', datetime.now(), math.pi)
-    >>> tpr(2, 'Row2', datetime.now(), 1/3)
+    >>> tbl = TableLogger()
+    >>> tbl(1, 'Row1', datetime.now(), math.pi)
+    >>> tbl(2, 'Row2', datetime.now(), 1/3)
     +----------------------+---------------------+----------------------+
     | Row1                 | 2015-12-29 13:04:47 |    3.141592653589793 |
     | Row2                 | 2015-12-29 13:04:47 |    0.333333333333333 |
@@ -17,9 +17,9 @@ Examples:
     
     Print table header:
     
-    >>> tpr = TableLogger(columns=['name', 'age'])
-    >>> tpr('John Smith',  33)
-    >>> tpr('Tommy Cash', 25)
+    >>> tbl = TableLogger(columns=['name', 'age'])
+    >>> tbl('John Smith',  33)
+    >>> tbl('Tommy Cash', 25)
     +----------------------+----------------------+
     | name                 |                  age |
     |----------------------+----------------------|
@@ -29,10 +29,10 @@ Examples:
     
     Include time-delta and timestamp columns:
     
-    >>> tpr = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
+    >>> tbl = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
     >>> for e in 'abcde':
     >>>     time.sleep(random.randint(0, 3))
-    >>>     tpr(e)
+    >>>     tbl(e)
     +-----------+----------------------------+-----------------+--------------+
     |       row | timestamp                  |      time delta | data         |
     |-----------+----------------------------+-----------------+--------------|
@@ -45,11 +45,11 @@ Examples:
     
     Specify custom column widths and formatters:
     
-    >>> tpr = TableLogger(columns=['name', 'salary'],
-    >>>                    column_formatters={1: '{:,.2f}'.format},
-    >>>                    column_widths={0:12, 1:15})
-    >>> tpr('John Smith',  1200000.890)
-    >>> tpr('Tommy Cache',   70000.125)
+    >>> tbl = TableLogger(columns=['name', 'salary'],
+    >>>                   formatters={'salary': '{:,.2f}'.format},
+    >>>                   colwidth={'name':12, 'salary':15})
+    >>> tbl('John Smith',  1200000.890)
+    >>> tbl('Tommy Cache',   70000.125)
     +--------------+-----------------+
     | name         |          salary |
     |--------------+-----------------|
@@ -76,9 +76,9 @@ class TableLogger(object):
     The main class for printing tabular data.
     
     Example:
-        >>> tpr = TableLogger()
-        >>> tpr(1, 'Row1', datetime.now(), math.pi)
-        >>> tpr(2, 'Row2', datetime.now(),    1/3.)
+        >>> tbl = TableLogger()
+        >>> tbl(1, 'Row1', datetime.now(), math.pi)
+        >>> tbl(2, 'Row2', datetime.now(),    1/3.)
     
     Args:
         time_delta (boolean): include a time delta column. Defaults to False.
@@ -87,8 +87,8 @@ class TableLogger(object):
         columns (list): column names. If specified, a table header will be
             printed. Defaults to None.
         border (boolean): draw table borders. Defaults to True.
-        column_formatters (dict): custom column formatters. Defaults to None.
-        column_widths (dict): custom column widths. Defaults to None.
+        formatters (dict): custom column formatters. Defaults to None.
+        colwidth (dict): custom column widths. Defaults to None.
         file (file object): Defaults to sys.stdout
     """
     
@@ -99,8 +99,8 @@ class TableLogger(object):
                  rownum=False,
                  columns=None,
                  border=True,
-                 column_formatters=None,
-                 column_widths=None,
+                 formatters=None,
+                 colwidth=None,
                  file=sys.stdout,
                  ):
         self.time_diff = time_delta
@@ -108,8 +108,8 @@ class TableLogger(object):
         self.rownum = rownum
         self.columns = columns if columns is not None else []
         self.border = border
-        self.column_formatters = column_formatters or {}
-        self.column_widths = column_widths or {}
+        self.column_formatters = formatters or {}
+        self.column_widths = colwidth or {}
         self.file = file
         
         self.col_sep = ' '
@@ -131,30 +131,38 @@ class TableLogger(object):
             *args: row cells
         """
         formatters = []
-        if self.time_diff:
-            formatters.insert(0, fmt.TimeDeltaFormatter.setup(0))
-        if self.timestamp:
-            formatters.insert(0, fmt.DatetimeFormatter.setup(
-                                        datetime.datetime.now(),
-                                        fmt='{:%Y-%m-%d %H:%M:%S.%f}'.format,
-                                        col_width=26))
-        if self.rownum:
-            formatters.insert(0, fmt.RowNumberFormatter.setup(0))
         
-        for col, value in enumerate(args):
-            if type(value) in type2fmt:
-                fmt_class = type2fmt[type(value)]
-            else:
-                fmt_class = fmt.GenericFormatter
-            
+        # initialize formatters for rowid, timestamp and time-diff columns
+        if self.rownum:
+            formatters.append(fmt.RowNumberFormatter.setup(0))
+        if self.timestamp:
+            formatters.append(fmt.DatetimeFormatter.setup(
+                                    datetime.datetime.now(),
+                                    fmt='{:%Y-%m-%d %H:%M:%S.%f}'.format,
+                                    col_width=26))
+        if self.time_diff:
+            formatters.append(fmt.TimeDeltaFormatter.setup(0))
+        
+        # initialize formatters for user-defined columns
+        for coli, value in enumerate(args):
+            fmt_class = type2fmt.get(type(value), fmt.GenericFormatter)
             kwargs = {}
-            if col in self.column_widths:
-                kwargs['col_width'] = self.column_widths[col] 
-            if col in self.column_formatters:
-                kwargs['fmt'] = self.column_formatters[col]
+            
+            # set column width
+            if coli in self.column_widths:
+                kwargs['col_width'] = self.column_widths[coli]
+            elif self.columns and self.columns[coli] in self.column_widths:
+                kwargs['col_width'] = self.column_widths[self.columns[coli]]
+            
+            # set formatter function
+            if coli in self.column_formatters:
+                kwargs['fmt'] = self.column_formatters[coli]
+            elif self.columns and self.columns[coli] in self.column_formatters:
+                kwargs['fmt'] = self.column_formatters[self.columns[coli]]
             
             formatter = fmt_class.setup(value, **kwargs)
             formatters.append(formatter)
+            
         self.formatters = formatters
     
     
@@ -165,27 +173,38 @@ class TableLogger(object):
             *args: row cells
         """
         if len(self.formatters) == 0:
-            self.setup_formatters(*args)
-            if self.columns:
-                self.print_header()
-            elif self.border:
-                self.print_line(self.make_horizontal_border())
+            self.setup(*args)
         
-        args = list(args)
+        row_cells = []
         
-        if self.time_diff:
-            args.insert(0, 0)
-        if self.timestamp:
-            args.insert(0, datetime.datetime.now())
         if self.rownum:
-            args.insert(0, 1000)
+            row_cells.append(0)
+        if self.timestamp:
+            row_cells.append(datetime.datetime.now())
+        if self.time_diff:
+            row_cells.append(0)
         
-        if len(args) != len(self.formatters):
-            raise ValueError('Expected number of columns - {}. Got {}.'.format(
-                                len(self.formatters), len(args)))
+        row_cells.extend(args)
         
-        line = self.format_row(*args)
+        if len(row_cells) != len(self.formatters):
+            raise ValueError('Expected number of columns is {}. Got {}.'.format(
+                                len(self.formatters), len(row_cells)))
+        
+        line = self.format_row(*row_cells)
         self.print_line(line)
+    
+    
+    def setup(self, *args):
+        """Do preparations before printing the first row
+        
+        Args:
+            *args: first row cells 
+        """
+        self.setup_formatters(*args)
+        if self.columns:
+            self.print_header()
+        elif self.border:
+            self.print_line(self.make_horizontal_border())
         
     
     def format_row(self, *args):
@@ -200,11 +219,11 @@ class TableLogger(object):
     
     def print_header(self):
         col_names = []
-        for col_idx, col_name in enumerate(self.columns):
-            col_width = self.formatters[col_idx].col_width
+        for coli, col_name in enumerate(self.columns):
+            col_width = self.formatters[coli].col_width
             if len(col_name ) > col_width:
                 col_name  = col_name[:col_width-3] + '...'
-            col_name = self.formatters[col_idx].just(col_name, col_width)
+            col_name = self.formatters[coli].just(col_name, col_width)
             col_names.append(col_name)
         
         header = self.join_row_items(*col_names)

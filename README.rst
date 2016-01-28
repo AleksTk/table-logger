@@ -2,7 +2,8 @@
 TableLogger
 ============
 
-TableLogger is a handy Python utility for logging tabular data into a console or a text file.
+TableLogger is a handy Python utility for logging tabular data into a console 
+or a text file with minimum overhead.
 
 
 Usage
@@ -10,11 +11,11 @@ Usage
 ::
 
     from table_logger import TableLogger
-    tpl = TableLogger(columns=['a', 'b', 'c', 'd'])
+    tbl = TableLogger(columns=['a', 'b', 'c', 'd'])
     
-    tpl(1, 'Row1', datetime.now(), math.pi)
-    tpl(2, 'Row2', datetime.now(), 1/3)
-    tpl(3, 'Row3', datetime.now(), random.random())
+    tbl(1, 'Row1', datetime.now(), math.pi)
+    tbl(2, 'Row2', datetime.now(), 1/3)
+    tbl(3, 'Row3', datetime.now(), random.random())
 
 Output::
 
@@ -29,10 +30,10 @@ Output::
 Features
 --------
 
-* sane default formatting for basic python types: int, float, date and datetime
+* sane default formatting for basic python types
 * row number, timestamp and time delta columns
 * allows to adjust column width and format
-* python 2.7 and 3.4 support
+* python 2.7 and 3 support
 
 
 Installation
@@ -49,15 +50,15 @@ GitHub::
     $ python setup.py install
 
 
-More Examples
--------------
+Examples
+--------
 
 Include row number, time-delta and timestamp columns::
 
-    tpl = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
+    tbl = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
     for e in 'abcde':
         time.sleep(random.randint(0, 3))
-        tpl(e)
+        tbl(e)
 
 Output::
 
@@ -74,11 +75,11 @@ Output::
 
 Specify custom column widths and formatters::
 
-    tpl = TableLogger(columns=['name', 'salary'],
-                      column_formatters={1: '{:,.2f}'.format},
-                      column_widths={0:12, 1:15})
-    tpl('John Smith',  1200000.890)
-    tpl('Tommy Cache',   70000.125)
+    tbl = TableLogger(columns=['name', 'salary'],
+                      formatters={'salary': '{:,.2f}'.format},
+                      colwidth={'name':12, 'salary':15})
+    tbl('John Smith',  1200000.890)
+    tbl('Tommy Cache',   70000.125)
 
 Output::
 

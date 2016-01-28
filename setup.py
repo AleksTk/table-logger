@@ -17,13 +17,15 @@ setup(
     license = "GNU GPL 2.0",
     keywords = ["tabular", "structured", "data", "console", "log"],
     url = "https://github.com/AleksTk/table-logger",
-    download_url = 'https://github.com/AleksTk/table-logger/tarball/v0.1',
+    download_url = 'https://github.com/AleksTk/table-logger/tarball/v0.2',
     packages=['table_logger'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Topic :: Software Development :: Libraries",
         "Topic :: System :: Logging",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
 )
