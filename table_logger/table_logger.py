@@ -109,7 +109,7 @@ class TableLogger(object):
                  csv=False,
                  formatters=None,
                  colwidth=None,
-                 file=sys.stdout,
+                 file=None,
                  encoding='utf-8'
                  ):
         self.time_diff = time_delta
@@ -120,7 +120,7 @@ class TableLogger(object):
         self.csv = csv
         self.column_formatters = formatters or {}
         self.column_widths = colwidth or {}
-        self.file = file
+        self.file = file if file else (sys.stdout if PY2 else sys.stdout.buffer)
         self.encoding = encoding
         
         self.col_sep = ' '
