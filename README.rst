@@ -8,7 +8,7 @@ or a text file with minimum overhead.
 
 Usage
 -----
-::
+.. code-block:: python
 
     from table_logger import TableLogger
     tbl = TableLogger(columns=['a', 'b', 'c', 'd'])
@@ -54,7 +54,9 @@ GitHub::
 Examples
 --------
 
-Include row number, time-delta and timestamp columns::
+Include row number, time-delta and timestamp columns
+
+.. code-block:: python
 
     tbl = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
     for e in 'abcde':
@@ -74,8 +76,10 @@ Output::
 
 
 
-Output to csv file::
-    
+Write to csv file
+
+.. code-block:: python
+
      with open('log.csv', 'w') as csvfile:
         tbl = TableLogger(file=csvfile, csv=True, columns=['a', 'b'])
         tbl('John "Smith"',  1200000.890)
@@ -89,7 +93,9 @@ Output::
 
 
 
-Specify custom column widths and formatters::
+Specify custom column widths and formatters
+
+.. code-block:: python
 
     tbl = TableLogger(columns=['name', 'salary'],
                       formatters={'salary': '{:,.2f}'.format},
