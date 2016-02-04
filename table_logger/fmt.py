@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division, absolute_import, print_function
 """The module contains column formatters for basic python types."""
 
 import time

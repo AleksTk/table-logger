@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division, absolute_import, print_function
 """
 TableLogger is a handy Python utility for logging tabular data into a console or a file.
 
