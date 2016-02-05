@@ -3,7 +3,7 @@ TableLogger
 ============
 
 TableLogger is a handy Python utility for logging tabular data into a console 
-or a text file with minimum overhead.
+or a text file with little overhead.
 
 
 Usage
