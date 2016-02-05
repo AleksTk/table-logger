@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name = "table-logger",
-    version = "0.3",
+    version = "0.3.1",
     author = "Alexander Tkachenko",
     author_email = "alex.tk.fb@gmail.com",
     description = ("TableLogger is a handy Python utility for logging tabular"
@@ -17,7 +17,7 @@ setup(
     license = "GNU GPL 2.0",
     keywords = ["tabular", "structured", "data", "console", "log"],
     url = "https://github.com/AleksTk/table-logger",
-    download_url = 'https://github.com/AleksTk/table-logger/archive/v0.3.tar.gz',
+    download_url = 'https://github.com/AleksTk/table-logger/archive/v0.3.1.tar.gz',
     packages=['table_logger'],
     long_description=read('README.rst'),
     classifiers=[
@@ -26,6 +26,7 @@ setup(
         "Topic :: System :: Logging",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
+        "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
 )
