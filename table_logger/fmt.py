@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, absolute_import, print_function
+
 """The module contains column formatters for basic python types."""
 
 import time
@@ -19,15 +20,13 @@ class GenericFormatter(object):
         fmt (function):  formatting functions
         col_width (int): column width
         just (str): column alignment: "l" for left,  "r" for right.
-    """ 
-    
-    
+    """
+
     def __init__(self, fmt, col_width, just):
         self.fmt = fmt
         self.col_width = col_width
         self.just = ljust if just == 'l' else rjust
-    
-    
+
     def __call__(self, value):
         """
         Formats a given value
@@ -40,11 +39,10 @@ class GenericFormatter(object):
         """
         fmt = self.fmt(value)
         if len(fmt) > self.col_width:
-            fmt = fmt[:self.col_width-3] + '...'
+            fmt = fmt[:self.col_width - 3] + '...'
         fmt = self.just(fmt, self.col_width)
         return fmt
-    
-    
+
     @classmethod
     def setup(cls, value, fmt='{}'.format, col_width=20, just='l'):
         return cls(fmt, col_width, just)
@@ -65,24 +63,19 @@ class DatetimeFormatter(GenericFormatter):
 
 
 class RowNumberFormatter(GenericFormatter):
-    
-    
     def __call__(self, value):
         if not hasattr(self, 'n'):
             self.n = 1
         fmt = super(RowNumberFormatter, self).__call__(self.n)
         self.n += 1
         return fmt
-    
-    
+
     @classmethod
     def setup(cls, value, fmt='{:d}'.format, col_width=9, just='r'):
         return cls(fmt, col_width, just)
 
 
 class TimeDeltaFormatter(GenericFormatter):
-    
-    
     def __call__(self, value):
         if not hasattr(self, 'time'):
             self.time = time.time()
@@ -90,20 +83,18 @@ class TimeDeltaFormatter(GenericFormatter):
         self.time = time.time()
         fmt = super(TimeDeltaFormatter, self).__call__(diff)
         return fmt
-    
-        
+
     @classmethod
     def setup(cls, value, fmt='{:.9f}'.format, col_width=15, just='r'):
         return cls(fmt, col_width, just)
 
-    
-    
+
 class IntegerForamtter(GenericFormatter):
     @classmethod
     def setup(cls, value, fmt=None, col_width=20, just='r'):
         if fmt is None:
             if len(str(value)) > col_width:
-                fmt = '{{:.{}e}}'.format(col_width-8)
+                fmt = '{{:.{}e}}'.format(col_width - 8)
             else:
                 fmt = '{}'
             fmt = fmt.format
@@ -134,9 +125,8 @@ class FloatFormatter(GenericFormatter):
 
 
 def ljust(text, n):
-        return text.ljust(n)
+    return text.ljust(n)
 
 
 def rjust(text, n):
     return text.rjust(n)
-  
