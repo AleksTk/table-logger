@@ -132,17 +132,17 @@ class Test(unittest.TestCase):
         tbl = TableLogger(file=f, time_delta=True, border=False)
         tbl()
         val = float(f.getvalue().split()[-1])
-        self.assertAlmostEqual(0, val, places=2)
+        self.assertAlmostEqual(0, val, places=1)
         
         time.sleep(1)
         tbl()
         val = float(f.getvalue().split()[-1])
-        self.assertAlmostEqual(1, val, places=2)
+        self.assertAlmostEqual(1, val, places=1)
         
         time.sleep(3)
         tbl()
         val = float(f.getvalue().split()[-1])
-        self.assertAlmostEqual(3, val, places=2)
+        self.assertAlmostEqual(3, val, places=1)
     
     
     def test_rownum_column(self):
@@ -160,7 +160,19 @@ class Test(unittest.TestCase):
         tbl = TableLogger(file=f, columns=['a', 'b'], csv=True)
         tbl('ä', '2')
         self.assertEqual(f.getvalue().decode('utf8').rstrip(), 'a,b\nä,2')
+    
+    def test_columns(self):
+        t = TableLogger(columns=['a', 'b'])
+        self.assertEqual(t.columns, ['a', 'b'])
         
+        t = TableLogger(columns='a,b')
+        self.assertEqual(t.columns, ['a', 'b'])
+        
+        t = TableLogger()
+        self.assertEqual(t.columns, [])
+        
+        self.assertRaises(ValueError, lambda: TableLogger(columns=''))
+
         
 if __name__ == "__main__":
     unittest.main()

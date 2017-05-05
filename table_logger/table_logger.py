@@ -17,7 +17,7 @@ Examples:
     
     Print table header:
     
-    >>> tbl = TableLogger(columns=['name', 'age'])
+    >>> tbl = TableLogger(columns='name,age'])
     >>> tbl('John Smith',  33)
     >>> tbl('Tommy Cash', 25)
     +----------------------+----------------------+
@@ -29,7 +29,7 @@ Examples:
     
     Include time-delta and timestamp columns:
     
-    >>> tbl = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
+    >>> tbl = TableLogger(columns='data', rownum=True, time_delta=True, timestamp=True)
     >>> for e in 'abcde':
     >>>     time.sleep(random.randint(0, 3))
     >>>     tbl(e)
@@ -45,7 +45,7 @@ Examples:
     
     Specify custom column widths and formatters:
     
-    >>> tbl = TableLogger(columns=['name', 'salary'],
+    >>> tbl = TableLogger(columns='name,salary',
     >>>                   formatters={'salary': '{:,.2f}'.format},
     >>>                   colwidth={'name':12, 'salary':15})
     >>> tbl('John Smith',  1200000.890)
@@ -67,6 +67,10 @@ from . import fmt
 
 PY2 = sys.version_info[0] == 2
 
+try:
+    basestring
+except NameError:
+    basestring = str
 
 type2fmt = {
     float:             fmt.FloatFormatter,
@@ -89,8 +93,8 @@ class TableLogger(object):
         time_delta (boolean): include a time delta column. Defaults to False.
         timestamp (boolean): include a timestamp column. Defaults to False.
         rownum (boolean): include a column with row numbers
-        columns (list): column names. If specified, a table header will be
-            printed. Defaults to None.
+        columns (list or str): a list of column names or a string of coma-delimited columns.
+            If specified, a table header will be printed. Defaults to None.
         border (boolean): draw table borders. Defaults to True.
         csv (boolean): print output in csv format
         formatters (dict): custom column formatters. Defaults to None.
@@ -115,13 +119,21 @@ class TableLogger(object):
         self.time_diff = time_delta
         self.timestamp = timestamp
         self.rownum = rownum
-        self.columns = columns if columns is not None else []
         self.border = border
         self.csv = csv
         self.column_formatters = formatters or {}
         self.column_widths = colwidth or {}
         self.file = file if file else (sys.stdout if PY2 else sys.stdout.buffer)
         self.encoding = encoding
+        
+        if columns is None:
+            self.columns = []
+        elif isinstance(columns, list):
+            self.columns = columns
+        elif isinstance(columns, basestring):
+            if len(columns) == 0:
+                raise ValueError('Invalid "columns" argument')
+            self.columns = columns.split(',')
         
         self.col_sep = ' '
         self.formatters = []
