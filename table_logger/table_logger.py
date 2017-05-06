@@ -74,7 +74,7 @@ except NameError:
 
 type2fmt = {
     float: fmt.FloatFormatter,
-    int: fmt.IntegerForamtter,
+    int: fmt.IntegerFormatter,
     datetime.datetime: fmt.DatetimeFormatter,
     datetime.date: fmt.DateFormatter,
 }
@@ -186,7 +186,7 @@ class TableLogger(object):
         """
         formatters = []
 
-        # initialize formatters for rowid, timestamp and time-diff columns
+        # initialize formatters for row-id, timestamp and time-diff columns
         if self.rownum:
             formatters.append(fmt.RowNumberFormatter.setup(0))
         if self.timestamp:

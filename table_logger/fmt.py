@@ -89,7 +89,7 @@ class TimeDeltaFormatter(GenericFormatter):
         return cls(fmt, col_width, just)
 
 
-class IntegerForamtter(GenericFormatter):
+class IntegerFormatter(GenericFormatter):
     @classmethod
     def setup(cls, value, fmt=None, col_width=20, just='r'):
         if fmt is None:
