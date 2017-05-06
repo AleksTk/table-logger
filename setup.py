@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import os
 from setuptools import setup
+import os
+import re
 
 
 def read(fname):
@@ -8,16 +9,16 @@ def read(fname):
 
 
 setup(
-    name = "table-logger",
-    version = "0.3.1",
-    author = "Alexander Tkachenko",
-    author_email = "alex.tk.fb@gmail.com",
-    description = ("TableLogger is a handy Python utility for logging tabular"
-                   " data into a console or a file."),
-    license = "GNU GPL 2.0",
-    keywords = ["tabular", "structured", "data", "console", "log"],
-    url = "https://github.com/AleksTk/table-logger",
-    download_url = 'https://github.com/AleksTk/table-logger/archive/v0.3.1.tar.gz',
+    name="table-logger",
+    version=re.search("__version__ = '(.+)'", open("table_logger/_version.py").readlines()[0].rstrip()).group(1),
+    author="Alexander Tkachenko",
+    author_email="alex.tk.fb@gmail.com",
+    description=("TableLogger is a handy Python utility for logging tabular"
+                 " data into a console or a file."),
+    license="GNU GPL 2.0",
+    keywords=["tabular", "structured", "data", "console", "log"],
+    url="https://github.com/AleksTk/table-logger",
+    download_url='https://github.com/AleksTk/table-logger/archive/v0.3.1.tar.gz',
     packages=['table_logger'],
     long_description=read('README.rst'),
     classifiers=[
