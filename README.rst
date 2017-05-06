@@ -11,7 +11,7 @@ Usage
 .. code-block:: python
 
     from table_logger import TableLogger
-    tbl = TableLogger(columns=['a', 'b', 'c', 'd'])
+    tbl = TableLogger(columns='a,b,c,d'])
     
     tbl(1, 'Row1', datetime.now(), math.pi)
     tbl(2, 'Row2', datetime.now(), 1/3)
@@ -58,7 +58,7 @@ Include row number, time-delta and timestamp columns
 
 .. code-block:: python
 
-    tbl = TableLogger(columns=['data'], rownum=True, time_delta=True, timestamp=True)
+    tbl = TableLogger(columns='data', rownum=True, time_delta=True, timestamp=True)
     for e in 'abcde':
         time.sleep(random.randint(0, 3))
         tbl(e)
@@ -81,7 +81,7 @@ Write to csv file
 .. code-block:: python
 
      with open('log.csv', 'w') as csvfile:
-        tbl = TableLogger(file=csvfile, csv=True, columns=['a', 'b'])
+        tbl = TableLogger(file=csvfile, csv=True, columns='a,b'])
         tbl('John "Smith"',  1200000.890)
         tbl('Tommy,Cache',   70000.125)
 
@@ -97,7 +97,7 @@ Specify custom column widths and formatters
 
 .. code-block:: python
 
-    tbl = TableLogger(columns=['name', 'salary'],
+    tbl = TableLogger(columns='name,salary',
                       formatters={'salary': '{:,.2f}'.format},
                       colwidth={'name':12, 'salary':15})
     tbl('John Smith',  1200000.890)
