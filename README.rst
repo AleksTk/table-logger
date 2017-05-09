@@ -11,7 +11,7 @@ Usage
 .. code-block:: python
 
     from table_logger import TableLogger
-    tbl = TableLogger(columns='a,b,c,d'])
+    tbl = TableLogger(columns='a,b,c,d')
     
     tbl(1, 'Row1', datetime.now(), math.pi)
     tbl(2, 'Row2', datetime.now(), 1/3)
