@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, absolute_import, print_function
-
 """
 TableLogger is a handy Python utility for logging tabular data into a console or a file.
 
@@ -97,6 +96,7 @@ class TableLogger(object):
         border (boolean): draw table borders. Defaults to True.
         csv (boolean): print output in csv format
         formatters (dict): (column-name -> string-format) custom column formatters. Defaults to None.
+        float_format (str): default formatting to apply to all float columns.
         colwidth (dict): (column-name -> width) custom column widths. Defaults to None.
         default_colwidth (int): default width for all columns.
         file (file object): Defaults to sys.stdout
@@ -111,6 +111,7 @@ class TableLogger(object):
                  border=True,
                  csv=False,
                  formatters=None,
+                 float_format=None,
                  colwidth=None,
                  default_colwidth=None,
                  file=None,
@@ -122,6 +123,7 @@ class TableLogger(object):
         self.border = border
         self.csv = csv
         self.column_formatters = formatters or {}
+        self.float_format = float_format
         self.column_widths = colwidth or {}
         self.default_colwidth = default_colwidth
         self.file = file if file else (sys.stdout if PY2 else sys.stdout.buffer)
@@ -215,6 +217,8 @@ class TableLogger(object):
                 kwargs['col_width'] = self.column_widths[self.columns[coli]]
 
             # set formatter function
+            if fmt_class == fmt.FloatFormatter and self.float_format is not None:
+                kwargs['fmt'] = self.float_format
             if coli in self.column_formatters:
                 kwargs['fmt'] = self.column_formatters[coli]
             elif self.columns and self.columns[coli] in self.column_formatters:

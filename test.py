@@ -112,6 +112,12 @@ class Test(unittest.TestCase):
         tbl('col1', 'col2')
         self.assertEqual('col1  col2 \n', f.getvalue().decode('utf-8'))
 
+    def test_float_format(self):
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, float_format='{:.3}'.format, default_colwidth=7)
+        tbl(0.777777)
+        self.assertEqual('  0.778\n', f.getvalue().decode('utf-8'))
+
     def test_invalid_column_number(self):
         tbl = TableLogger(file=io.BytesIO())
         tbl(1, 2)
