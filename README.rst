@@ -81,7 +81,7 @@ Write to csv file
 .. code-block:: python
 
      with open('log.csv', 'w') as csvfile:
-        tbl = TableLogger(file=csvfile, csv=True, columns='a,b'])
+        tbl = TableLogger(file=csvfile, csv=True, columns='a,b')
         tbl('John "Smith"',  1200000.890)
         tbl('Tommy,Cache',   70000.125)
 
