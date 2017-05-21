@@ -18,7 +18,7 @@ Examples:
     
     Print table header:
     
-    >>> tbl = TableLogger(columns='name,age'])
+    >>> tbl = TableLogger(columns='name,age')
     >>> tbl('John Smith',  33)
     >>> tbl('Tommy Cash', 25)
     +----------------------+----------------------+
@@ -96,8 +96,9 @@ class TableLogger(object):
             If specified, a table header will be printed. Defaults to None.
         border (boolean): draw table borders. Defaults to True.
         csv (boolean): print output in csv format
-        formatters (dict): custom column formatters. Defaults to None.
-        colwidth (dict): custom column widths. Defaults to None.
+        formatters (dict): (column-name -> string-format) custom column formatters. Defaults to None.
+        colwidth (dict): (column-name -> width) custom column widths. Defaults to None.
+        default_colwidth (int): default width for all columns.
         file (file object): Defaults to sys.stdout
         encoding (unicode): Output encoding
     """
@@ -111,6 +112,7 @@ class TableLogger(object):
                  csv=False,
                  formatters=None,
                  colwidth=None,
+                 default_colwidth=None,
                  file=None,
                  encoding='utf-8'
                  ):
@@ -121,9 +123,11 @@ class TableLogger(object):
         self.csv = csv
         self.column_formatters = formatters or {}
         self.column_widths = colwidth or {}
+        self.default_colwidth = default_colwidth
         self.file = file if file else (sys.stdout if PY2 else sys.stdout.buffer)
         self.encoding = encoding
 
+        # set column names
         if columns is None:
             self.columns = []
         elif isinstance(columns, list):
@@ -203,6 +207,8 @@ class TableLogger(object):
             kwargs = {}
 
             # set column width
+            if self.default_colwidth is not None:
+                kwargs['col_width'] = self.default_colwidth
             if coli in self.column_widths:
                 kwargs['col_width'] = self.column_widths[coli]
             elif self.columns and self.columns[coli] in self.column_widths:

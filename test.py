@@ -92,16 +92,25 @@ class Test(unittest.TestCase):
         self.assertEqual(len(f.getvalue()) - 2, 30 + 20)
 
         f = io.BytesIO()
-        tbl = TableLogger(file=f, border=False, columns=['col1'],
-                          colwidth={'col1': 30})
+        tbl = TableLogger(file=f, border=False, columns=['col1'], colwidth={'col1': 30})
         tbl('value')
         self.assertEqual(len(f.getvalue().decode('utf-8').split('\n')[1]), 30)
 
         f = io.BytesIO()
-        tbl = TableLogger(file=f, border=False, columns=['c1', 'c2'],
-                          colwidth={'c1': 30, 'c2': 20})
+        tbl = TableLogger(file=f, border=False, columns=['c1', 'c2'], colwidth={'c1': 30, 'c2': 20})
         tbl('col1', 345)
         self.assertEqual(len(f.getvalue().decode('utf-8').split('\n')[1]) - 1, 30 + 20)
+
+    def test_default_colwidth(self):
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, default_colwidth=5)
+        tbl('col1')
+        self.assertEqual('col1 \n', f.getvalue().decode('utf-8'))
+
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, default_colwidth=5)
+        tbl('col1', 'col2')
+        self.assertEqual('col1  col2 \n', f.getvalue().decode('utf-8'))
 
     def test_invalid_column_number(self):
         tbl = TableLogger(file=io.BytesIO())
