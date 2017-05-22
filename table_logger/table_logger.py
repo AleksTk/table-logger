@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, absolute_import, print_function
+
 """
 TableLogger is a handy Python utility for logging tabular data into a console or a file.
 
@@ -99,7 +100,7 @@ class TableLogger(object):
         float_format (str): default formatting to apply to all float columns.
         colwidth (dict): (column-name -> width) custom column widths. Defaults to None.
         default_colwidth (int): default width for all columns.
-        file (file object): Defaults to sys.stdout
+        file (file object or str): File to open. Defaults to sys.stdout
         encoding (unicode): Output encoding
     """
 
@@ -126,8 +127,15 @@ class TableLogger(object):
         self.float_format = float_format
         self.column_widths = colwidth or {}
         self.default_colwidth = default_colwidth
-        self.file = file if file else (sys.stdout if PY2 else sys.stdout.buffer)
         self.encoding = encoding
+
+        # set output file
+        if file is None:
+            self.file = sys.stdout if PY2 else sys.stdout.buffer
+        elif isinstance(file, basestring):
+            self.file = open(file, 'wb')
+        else:
+            self.file = file
 
         # set column names
         if columns is None:
@@ -298,3 +306,8 @@ class TableLogger(object):
             csvwriter.writerow([c.strip() for c in row])
             csv_line = buf.getvalue().rstrip()
         return csv_line
+
+    def close(self):
+        """Closes underlying output file"""
+        if self.file is not None:
+            self.file.close()

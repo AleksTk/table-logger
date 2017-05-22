@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, absolute_import, print_function
 
+import os
+import shutil
+import tempfile
 import unittest
 import io
 import datetime
@@ -175,6 +178,19 @@ class Test(unittest.TestCase):
         self.assertEqual(t.columns, [])
 
         self.assertRaises(ValueError, lambda: TableLogger(columns=''))
+
+    def test_file(self):
+        temp_dir = tempfile.mkdtemp(prefix='table-logger-temp-dir')
+        out_file = os.path.join(temp_dir, 'out.log')
+        try:
+            t = TableLogger(file=out_file, border=False, default_colwidth=2)
+            t(1, 'ü', 3)
+            t.close()
+            self.assertTrue(t.file.closed)
+            with open(out_file, 'rb') as f:
+                self.assertEqual(f.read().decode('utf-8'), ' 1 ü   3\n')
+        finally:
+            shutil.rmtree(temp_dir)
 
 
 if __name__ == "__main__":
