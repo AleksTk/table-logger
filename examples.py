@@ -11,15 +11,14 @@ from table_logger import TableLogger
 
 
 def print_simple():
-    tpl = TableLogger(columns=['a', 'b', 'c', 'd'])
+    tpl = TableLogger(columns='a,b,c,d')
     tpl(1, 'Row1', datetime.now(), math.pi)
-    tpl(2, 'Row2', datetime.now(), 1/3)
+    tpl(2, 'Row2', datetime.now(), 1 / 3)
     tpl(3, 'Row3', datetime.now(), random.random())
 
 
 def print_time_delta():
-    tpl = TableLogger(columns=['data'], rownum=True, time_delta=True, 
-                       timestamp=True)
+    tpl = TableLogger(columns='data', rownum=True, time_delta=True, timestamp=True)
     for e in 'abcde':
         time.sleep(random.randint(0, 3))
         tpl(e)
@@ -27,7 +26,7 @@ def print_time_delta():
 
 def print_file_info():
     """Prints file details in the current directory"""
-    tpl = TableLogger(columns=['file', 'created', 'modified', 'size'])
+    tpl = TableLogger(columns='file,created,modified,size')
     for f in os.listdir('.'):
         size = os.stat(f).st_size
         date_created = datetime.fromtimestamp(os.path.getctime(f))
@@ -39,4 +38,3 @@ if __name__ == "__main__":
     print_simple()
     print_file_info()
     print_time_delta()
-    

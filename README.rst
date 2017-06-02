@@ -98,15 +98,15 @@ Specify custom column widths and formatters
 .. code-block:: python
 
     tbl = TableLogger(columns='name,salary',
-                      formatters={'salary': '{:,.2f}'.format},
-                      colwidth={'name':12, 'salary':15})
+                      float_format='{:,.2f}'.format,
+                      default_colwidth=15)
     tbl('John Smith',  1200000.890)
     tbl('Tommy Cache',   70000.125)
 
 Output::
 
-    +--------------+-----------------+
-    | name         |          salary |
-    |--------------+-----------------|
-    | John Smith   |    1,200,000.89 |
-    | Tommy Cache  |       70,000.12 |
+    +-----------------+-----------------+
+    | name            |          salary |
+    |-----------------+-----------------|
+    | John Smith      |    1,200,000.89 |
+    | Tommy Cache     |       70,000.12 |
