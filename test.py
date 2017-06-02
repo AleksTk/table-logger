@@ -9,6 +9,8 @@ import io
 import datetime
 import time
 
+import numpy as np
+
 from table_logger import TableLogger
 from table_logger.fmt import GenericFormatter, FloatFormatter
 
@@ -115,11 +117,42 @@ class Test(unittest.TestCase):
         tbl('col1', 'col2')
         self.assertEqual('col1  col2 \n', f.getvalue().decode('utf-8'))
 
-    def test_float_format(self):
+    def test_float_formatting(self):
+        val = 0.777777
         f = io.BytesIO()
         tbl = TableLogger(file=f, border=False, float_format='{:.3}'.format, default_colwidth=7)
-        tbl(0.777777)
+        tbl(val)
         self.assertEqual('  0.778\n', f.getvalue().decode('utf-8'))
+
+        # test np.float32
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, float_format='{:.3}'.format, default_colwidth=7)
+        tbl(np.float32(val))
+        self.assertEqual('  0.778\n', f.getvalue().decode('utf-8'))
+
+        # test np.float64
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, float_format='{:.3}'.format, default_colwidth=7)
+        tbl(np.float64(val))
+        self.assertEqual('  0.778\n', f.getvalue().decode('utf-8'))
+
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, float_format='{:.5}'.format, default_colwidth=6)
+        tbl(0.333333333333)
+        self.assertEqual('0.3...\n', f.getvalue().decode('utf-8'))
+
+    def test_int_formatting(self):
+        val = 123
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, default_colwidth=7)
+        tbl(val)
+        self.assertEqual('    123\n', f.getvalue().decode('utf-8'))
+
+        f = io.BytesIO()
+        tbl = TableLogger(file=f, border=False, default_colwidth=7)
+        tbl(np.int32(val))
+        self.assertEqual('    123\n', f.getvalue().decode('utf-8'))
+
 
     def test_invalid_column_number(self):
         tbl = TableLogger(file=io.BytesIO())

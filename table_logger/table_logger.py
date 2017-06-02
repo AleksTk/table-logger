@@ -63,6 +63,8 @@ import datetime
 import csv
 import io
 
+import numpy as np
+
 from . import fmt
 
 PY2 = sys.version_info[0] == 2
@@ -73,8 +75,19 @@ except NameError:
     basestring = str
 
 type2fmt = {
+    # floats
     float: fmt.FloatFormatter,
+    np.float: fmt.FloatFormatter,
+    np.float32: fmt.FloatFormatter,
+    np.float64: fmt.FloatFormatter,
+
+    # int
     int: fmt.IntegerFormatter,
+    np.int: fmt.IntegerFormatter,
+    np.int16: fmt.IntegerFormatter,
+    np.int32: fmt.IntegerFormatter,
+    np.int64: fmt.IntegerFormatter,
+
     datetime.datetime: fmt.DatetimeFormatter,
     datetime.date: fmt.DateFormatter,
 }
@@ -97,7 +110,7 @@ class TableLogger(object):
         border (boolean): draw table borders. Defaults to True.
         csv (boolean): print output in csv format
         formatters (dict): (column-name -> string-format) custom column formatters. Defaults to None.
-        float_format (str): default formatting to apply to all float columns.
+        float_format (callable): formatting function to apply to all float columns by default.
         colwidth (dict): (column-name -> width) custom column widths. Defaults to None.
         default_colwidth (int): default width for all columns.
         file (file object or str): File to open. Defaults to sys.stdout

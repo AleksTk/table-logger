@@ -21,6 +21,7 @@ setup(
     download_url='https://github.com/AleksTk/table-logger/archive/v0.3.1.tar.gz',
     packages=['table_logger'],
     long_description=read('README.rst'),
+    requires=['numpy', ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Topic :: Software Development :: Libraries",
