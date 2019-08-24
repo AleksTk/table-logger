@@ -113,7 +113,7 @@ class TableLogger(object):
         float_format (callable): formatting function to apply to all float columns by default.
         colwidth (dict): (column-name -> width) custom column widths. Defaults to None.
         default_colwidth (int): default width for all columns.
-        file (file object or str): File to open. Defaults to sys.stdout
+        file (file object or str): File to open. Expects file object to be opened in binary writing mode 'wb'. Defaults to sys.stdout.
         encoding (unicode): Output encoding
     """
 
@@ -144,7 +144,13 @@ class TableLogger(object):
 
         # set output file
         if file is None:
-            self.file = sys.stdout if PY2 else sys.stdout.buffer
+            if PY2:
+                self.file = sys.stdout
+            else:
+                if hasattr(sys.stdout, 'buffer'):
+                    self.file = sys.stdout.buffer
+                else:
+                    self.file = sys.stdout
         elif isinstance(file, basestring):
             self.file = open(file, 'wb')
         else:
