@@ -142,15 +142,18 @@ class TableLogger(object):
         self.default_colwidth = default_colwidth
         self.encoding = encoding
 
+        # set stdout
+        if PY2:
+            self.stdout = sys.stdout
+        else:
+            if hasattr(sys.stdout, 'buffer'):
+                self.stdout = sys.stdout.buffer
+            else:
+                self.stdout = sys.stdout
+                    
         # set output file
         if file is None:
-            if PY2:
-                self.file = sys.stdout
-            else:
-                if hasattr(sys.stdout, 'buffer'):
-                    self.file = sys.stdout.buffer
-                else:
-                    self.file = sys.stdout
+            self.file = self.stdout
         elif isinstance(file, basestring):
             self.file = open(file, 'wb')
         else:
@@ -305,9 +308,13 @@ class TableLogger(object):
         return row
 
     def print_line(self, text):
-        self.file.write(text.encode(self.encoding))
-        self.file.write(b'\n')
-        self.file.flush()
+        self.stdout.write(text.encode(self.encoding))
+        self.stdout.write(b'\n')
+        self.stdout.flush()
+        if self.file is not None:
+            self.file.write(text.encode(self.encoding))
+            self.file.write(b'\n')
+            self.file.flush()
 
     def csv_format(self, row):
         """Converts row values into a csv line
