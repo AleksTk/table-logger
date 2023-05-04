@@ -14,7 +14,7 @@ setup(
     author="Alexander Tkachenko",
     author_email="alex.tk.fb@gmail.com",
     description=("TableLogger is a handy Python utility for logging tabular"
-                 " data into a console or a file."),
+                 " data into various output streams."),
     license="GNU GPL 2.0",
     keywords=["tabular", "structured", "data", "console", "log"],
     url="https://github.com/AleksTk/table-logger",
