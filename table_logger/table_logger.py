@@ -362,6 +362,6 @@ class TableLogger(object):
         return csv_line
 
     def close(self):
-        """Closes underlying output output"""
+        """Closes underlying output stream"""
         if self.output is not None:
             self.output.close()
