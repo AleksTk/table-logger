@@ -5,9 +5,11 @@ import os
 import time
 import random
 import math
+import logging
 from datetime import datetime
 
 from table_logger import TableLogger
+
 
 
 def print_simple():
@@ -33,8 +35,16 @@ def print_file_info():
         date_modified = datetime.fromtimestamp(os.path.getmtime(f))
         tpl(f, date_created, date_modified, size)
 
+def print_using_logger():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+    tpl = TableLogger(output=logger, level='INFO', columns='a,b,c,d')
+    tpl(1, 'Row1', datetime.now(), math.pi)
+    tpl(2, 'Row2', datetime.now(), 1 / 3)
+    tpl(3, 'Row3', datetime.now(), random.random())
 
 if __name__ == "__main__":
     print_simple()
     print_file_info()
     print_time_delta()
+    print_using_logger()

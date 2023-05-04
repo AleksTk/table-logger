@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, division, absolute_import, print_function
 
 """
-TableLogger is a handy Python utility for logging tabular data into a console or a file.
+TableLogger is a handy Python utility for logging tabular data into various output streams.
 
 Examples:
     
@@ -16,6 +16,25 @@ Examples:
     | Row2                 | 2015-12-29 13:04:47 |    0.333333333333333 |
     
     
+    Using a logger such as loguru example:
+    
+    >>> from loguru import logger
+
+    >>> logger.remove(0)
+    >>> logger.add(sys.stdout, format="{time} | {level} | {message}", level="INFO")
+    >>> tbl = TableLogger(output=logger, 
+                          level='INFO',
+                          columns='name,age')
+    >>> tbl('John Smith', 33)
+    >>> tbl('Tommy Cash', 25)
+
+    2023-05-03T22:54:06.485202-0700 | INFO | +----------------------+----------------------+
+    2023-05-03T22:54:06.485202-0700 | INFO | | name                 |                  age |
+    2023-05-03T22:54:06.486805-0700 | INFO | |----------------------+----------------------|
+    2023-05-03T22:54:06.486969-0700 | INFO | | John Smith           |                   33 |
+    2023-05-03T22:54:06.487469-0700 | INFO | | Tommy Cash           |                   25 |    
+
+
     Print table header:
     
     >>> tbl = TableLogger(columns='name,age')
@@ -113,8 +132,10 @@ class TableLogger(object):
         float_format (callable): formatting function to apply to all float columns by default.
         colwidth (dict): (column-name -> width) custom column widths. Defaults to None.
         default_colwidth (int): default width for all columns.
-        file (file object or str): File to open. Expects file object to be opened in binary writing mode 'wb'. Defaults to sys.stdout.
+        output (output object or str): Expects output object to be opened in binary writing mode 'wb'. Defaults to sys.stdout.
         encoding (unicode): Output encoding
+        level (str): logging level where using a logger as loguru for the output. Defaults to None. This is the logger method to use.
+        Ex. level='info' will use logger.info() to output the table.
     """
 
     def __init__(self,
@@ -128,7 +149,8 @@ class TableLogger(object):
                  float_format=None,
                  colwidth=None,
                  default_colwidth=None,
-                 file=None,
+                 output=None,
+                 level=None,
                  encoding='utf-8'
                  ):
         self.time_diff = time_delta
@@ -140,21 +162,22 @@ class TableLogger(object):
         self.float_format = float_format
         self.column_widths = colwidth or {}
         self.default_colwidth = default_colwidth
+        self.level = level
         self.encoding = encoding
 
-        # set output file
-        if file is None:
+        # set output output
+        if output is None:
             if PY2:
-                self.file = sys.stdout
+                self.output = sys.stdout
             else:
                 if hasattr(sys.stdout, 'buffer'):
-                    self.file = sys.stdout.buffer
+                    self.output = sys.stdout.buffer
                 else:
-                    self.file = sys.stdout
-        elif isinstance(file, basestring):
-            self.file = open(file, 'wb')
+                    self.output = sys.stdout
+        elif isinstance(output, basestring):
+            self.output = open(output, 'wb')
         else:
-            self.file = file
+            self.output = output
 
         # set column names
         if columns is None:
@@ -305,9 +328,18 @@ class TableLogger(object):
         return row
 
     def print_line(self, text):
-        self.file.write(text.encode(self.encoding))
-        self.file.write(b'\n')
-        self.file.flush()
+        if hasattr(self.output, 'write'):
+            self.output.write(text.encode(self.encoding))
+            self.output.write(b'\n')
+            self.output.flush()
+        elif self.level:
+            method = self.level.lower()
+            if hasattr(self.output, method):
+                getattr(self.output, method)(text)
+            else:
+                raise ValueError('Output does not have a {} method.'.format(self.level))
+        else:
+            raise ValueError('Output must have a write method or a level attribute.')
 
     def csv_format(self, row):
         """Converts row values into a csv line
@@ -330,6 +362,6 @@ class TableLogger(object):
         return csv_line
 
     def close(self):
-        """Closes underlying output file"""
-        if self.file is not None:
-            self.file.close()
+        """Closes underlying output stream"""
+        if self.output is not None:
+            self.output.close()
